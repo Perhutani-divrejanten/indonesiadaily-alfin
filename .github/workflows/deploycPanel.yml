@@ -13,7 +13,19 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      
+        
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies (if any)
+        run: |
+          if [ -f package.json ]; then npm ci; fi
+
+      - name: Run static generator
+        run: node tools/generate.js
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -21,8 +33,9 @@ jobs:
           username: deploy@wartajanten.net
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
-          protocol: ftps
-          server-dir: /indonesiadaily.wartajanten.my.id/
+          protocol: ftp
+          local-dir: ./  # atau ./ jika ingin upload semua
+          server-dir: /indonesiadaily/
           timeout: 60000
           dangerous-clean-slate: false
           exclude: |
@@ -43,5 +56,3 @@ jobs:
             fix-encoding.ps1
             rebrand-to-warta-janten.ps1
             replace-logo.ps1
-          security: loose
-          log-level: verbose
